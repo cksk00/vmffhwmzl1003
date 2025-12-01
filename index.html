@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Lab - fl02ky</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal active">
+        <div class="stars"></div>
+        <div class="login-container">
+            <button class="close-btn" onclick="closeLogin()">×</button>
+            <h2 class="login-title">Login</h2>
+            <div class="input-group">
+                <input type="text" id="username" placeholder="Username" autocomplete="off">
+                <span class="input-icon">👤</span>
+            </div>
+            <div class="input-group">
+                <input type="password" id="password" placeholder="Password" autocomplete="off">
+                <span class="input-icon">🔒</span>
+            </div>
+            <div class="remember-group">
+                <label>
+                    <input type="checkbox" id="remember">
+                    <span>Remember me</span>
+                </label>
+                <a href="#" class="forgot-link">Forgot Password?</a>
+            </div>
+            <button class="login-btn" onclick="login()">Login</button>
+            <div class="register-link">
+                Don't have an account? <a href="#">Register</a>
+            </div>
+            <div id="loginError" class="error-message"></div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="mainContent" class="hidden">
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="logo">
+                <span class="logo-text">SEC</span>
+                <span class="logo-accent">LAB</span>
+            </div>
+            <div class="nav-links">
+                <a href="#" onclick="showPage('home')" class="nav-link active">Home</a>
+                <a href="#" onclick="showPage('vulnerabilities')" class="nav-link">Vulnerabilities</a>
+                <a href="#" onclick="showPage('news')" class="nav-link">News</a>
+                <a href="#" onclick="showPage('calendar')" class="nav-link">Calendar</a>
+                <a href="#" onclick="showPage('logbook')" class="nav-link">LogBook</a>
+                <a href="#" onclick="showPage('archives')" class="nav-link">Archives</a>
+                <a href="#" onclick="showPage('about')" class="nav-link">About</a>
+            </div>
+            <div class="nav-actions">
+                <button class="profile-btn" onclick="toggleProfile()">
+                    <span class="profile-icon">👨‍💻</span>
+                </button>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </nav>
+
+        <!-- Profile Sidebar -->
+        <div id="profileSidebar" class="profile-sidebar">
+            <div class="profile-header">
+                <div class="profile-avatar-container">
+                    <img id="profileAvatarImg" class="profile-avatar-img" src="" alt="Profile" style="display: none;">
+                    <div id="profileAvatarText" class="profile-avatar">FL</div>
+                    <button class="edit-avatar-btn" onclick="changeProfileImage()">📷</button>
+                    <input type="file" id="profileImageInput" accept="image/*" style="display: none;" onchange="handleProfileImageChange(event)">
+                </div>
+                <h3>fl02ky</h3>
+                <p class="profile-role">$_CR4CK3R_$</p>
+            </div>
+            
+            <div class="profile-skills">
+                <div class="tags-header">
+                    <h4>Skills</h4>
+                    <button class="add-tag-btn" onclick="showAddSkillModal()">+</button>
+                </div>
+                <div id="profileSkills" class="skill-list"></div>
+            </div>
+            
+            <div class="profile-tags">
+                <div class="tags-header">
+                    <h4>Tags</h4>
+                    <button class="add-tag-btn" onclick="showAddTagModal()">+</button>
+                </div>
+                <div id="profileTags" class="tag-list"></div>
+            </div>
+            
+            <div class="profile-contacts">
+                <div class="tags-header">
+                    <h4>Contact</h4>
+                    <button class="add-tag-btn" onclick="showAddContactModal()">+</button>
+                </div>
+                <div id="profileContacts" class="contact-list"></div>
+            </div>
+        </div>
+
+        <!-- Add Skill Modal -->
+        <div id="addSkillModal" class="event-modal">
+            <div class="event-modal-content">
+                <button class="close-btn" onclick="closeAddSkillModal()">×</button>
+                <h2>스킬 추가</h2>
+                <div class="input-group">
+                    <label>분야 선택</label>
+                    <select id="skillCategory" onchange="toggleCustomSkill()">
+                        <option value="Web Security">Web Security</option>
+                        <option value="Binary Exploitation">Binary Exploitation</option>
+                        <option value="Cryptography">Cryptography</option>
+                        <option value="Reverse Engineering">Reverse Engineering</option>
+                        <option value="Network Security">Network Security</option>
+                        <option value="Forensics">Forensics</option>
+                        <option value="Mobile Security">Mobile Security</option>
+                        <option value="Cloud Security">Cloud Security</option>
+                        <option value="Malware Analysis">Malware Analysis</option>
+                        <option value="OSINT">OSINT</option>
+                        <option value="custom">직접 입력</option>
+                    </select>
+                </div>
+                <div class="input-group" id="customSkillGroup" style="display: none;">
+                    <label>스킬명 직접 입력</label>
+                    <input type="text" id="customSkillInput" placeholder="스킬명 입력">
+                </div>
+                <button class="submit-btn" onclick="addSkill()">추가</button>
+            </div>
+        </div>
+
+        <!-- Add Tag Modal -->
+        <div id="addTagModal" class="event-modal">
+            <div class="event-modal-content">
+                <button class="close-btn" onclick="closeAddTagModal()">×</button>
+                <h2>태그 추가</h2>
+                <div class="input-group">
+                    <input type="text" id="newTagInput" placeholder="#태그명">
+                </div>
+                <button class="submit-btn" onclick="addTag()">추가</button>
+            </div>
+        </div>
+
+        <!-- Add Contact Modal -->
+        <div id="addContactModal" class="event-modal">
+            <div class="event-modal-content">
+                <button class="close-btn" onclick="closeAddContactModal()">×</button>
+                <h2 id="contactFormTitle">연락처 추가</h2>
+                <div class="input-group">
+                    <label>플랫폼 이름</label>
+                    <input type="text" id="contactName" placeholder="Discord, Instagram, GitHub 등">
+                </div>
+                <div class="input-group">
+                    <label>URL</label>
+                    <input type="text" id="contactUrl" placeholder="https://... 또는 username">
+                </div>
+                <button class="submit-btn" onclick="saveContact()">저장</button>
+            </div>
+        </div>
+
+        <!-- Pages -->
+        <div id="homePage" class="page active">
+            <div class="hero">
+                <div class="hero-content">
+                    <h1 class="hero-title">Security Lab</h1>
+                    <p class="hero-subtitle">개인 취약점 실습 및 프로젝트 관리 환경</p>
+                    <div class="hero-grid">
+                        <div class="hero-card" onclick="showPage('vulnerabilities')">
+                            <div class="card-icon">🔓</div>
+                            <h3>Vulnerability Lab</h3>
+                            <p>XSS, SQLi, SSTI 등 다양한 취약점 실습</p>
+                        </div>
+                        <div class="hero-card" onclick="showPage('calendar')">
+                            <div class="card-icon">📅</div>
+                            <h3>Schedule Manager</h3>
+                            <p>CTF 및 프로젝트 일정 관리</p>
+                        </div>
+                        <div class="hero-card" onclick="showPage('logbook')">
+                            <div class="card-icon">📝</div>
+                            <h3>LogBook</h3>
+                            <p>일일 학습 기록 및 CTF Write-up</p>
+                        </div>
+                        <div class="hero-card" onclick="showPage('archives')">
+                            <div class="card-icon">🏆</div>
+                            <h3>Archives</h3>
+                            <p>참가한 CTF 및 콘퍼런스 기록</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="vulnerabilitiesPage" class="page">
+            <div class="page-header">
+                <h1>Vulnerability Lab</h1>
+                <button class="add-btn" onclick="showAddVulnModal()">+ 취약점 추가</button>
+            </div>
+            <div class="vuln-grid" id="vulnGrid"></div>
+
+            <!-- Vulnerability Detail Modal -->
+            <div id="vulnModal" class="vuln-modal">
+                <div class="vuln-modal-content">
+                    <button class="close-btn" onclick="closeVulnModal()">×</button>
+                    <button class="edit-vuln-btn" onclick="editCurrentVuln()">✏️ 수정</button>
+                    <button class="delete-vuln-btn" onclick="deleteCurrentVuln()">🗑️ 삭제</button>
+                    <div id="vulnDetail"></div>
+                </div>
+            </div>
+
+            <!-- Add/Edit Vulnerability Modal -->
+            <div id="addVulnModal" class="event-modal">
+                <div class="event-modal-content vuln-form-modal">
+                    <button class="close-btn" onclick="closeAddVulnModal()">×</button>
+                    <h2 id="vulnFormTitle">취약점 추가</h2>
+                    
+                    <div class="input-group">
+                        <label>아이콘</label>
+                        <input type="text" id="vulnIcon" placeholder="이모지 입력 (예: ⚡)">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>취약점 이름</label>
+                        <input type="text" id="vulnTitle" placeholder="예: Cross-Site Scripting (XSS)">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>소제목</label>
+                        <input type="text" id="vulnDescription" placeholder="한 줄 설명">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>난이도</label>
+                        <select id="vulnLevel">
+                            <option value="easy">Easy</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                            <option value="critical">Critical</option>
+                        </select>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>취약점 정의</label>
+                        <textarea id="vulnWhat" placeholder="취약점이란?"></textarea>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>취약점 유형 (한 줄에 하나씩)</label>
+                        <textarea id="vulnTypes" placeholder="각 유형을 한 줄씩 입력하세요"></textarea>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>공격 예시 (한 줄에 하나씩)</label>
+                        <textarea id="vulnExamples" placeholder="각 예시를 한 줄씩 입력하세요"></textarea>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>실습 시나리오 (한 줄에 하나씩)</label>
+                        <textarea id="vulnPractice" placeholder="각 시나리오를 한 줄씩 입력하세요"></textarea>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>대응 방안 (한 줄에 하나씩)</label>
+                        <textarea id="vulnCountermeasures" placeholder="각 대응 방안을 한 줄씩 입력하세요"></textarea>
+                    </div>
+                    
+                    <button class="submit-btn" onclick="saveVuln()">저장</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="calendarPage" class="page">
+            <div class="page-header">
+                <h1>일정 관리</h1>
+                <button class="add-btn" onclick="showAddEvent()">+ 일정 추가</button>
+            </div>
+            <div class="calendar-container">
+                <div class="calendar-header">
+                    <button onclick="prevMonth()">◀</button>
+                    <h2 id="currentMonth"></h2>
+                    <button onclick="nextMonth()">▶</button>
+                </div>
+                <div class="calendar-grid" id="calendarGrid"></div>
+            </div>
+            <div class="events-list">
+                <h3>다가오는 일정</h3>
+                <div id="eventsList"></div>
+            </div>
+
+            <!-- Add Event Modal -->
+            <div id="eventModal" class="event-modal">
+                <div class="event-modal-content">
+                    <button class="close-btn" onclick="closeEventModal()">×</button>
+                    <h2>일정 추가</h2>
+                    <div class="input-group">
+                        <label>제목</label>
+                        <input type="text" id="eventTitle" placeholder="일정 제목">
+                    </div>
+                    <div class="input-group">
+                        <label>유형</label>
+                        <select id="eventType">
+                            <option value="ctf">CTF</option>
+                            <option value="project">프로젝트</option>
+                            <option value="study">공부</option>
+                            <option value="other">기타</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>날짜</label>
+                        <input type="date" id="eventDate">
+                    </div>
+                    <div class="input-group">
+                        <label>설명</label>
+                        <textarea id="eventDesc" placeholder="일정 설명"></textarea>
+                    </div>
+                    <button class="submit-btn" onclick="addEvent()">추가</button>
+                </div>
+            </div>
+
+            <!-- Day Detail Panel -->
+            <div id="dayDetailOverlay" class="panel-overlay" onclick="closeDayDetail()"></div>
+            <div id="dayDetailPanel" class="day-detail-panel">
+                <button class="close-btn" onclick="closeDayDetail()">×</button>
+                <div class="day-detail-header">
+                    <h3 id="dayDetailTitle"></h3>
+                    <div class="day-detail-date" id="dayDetailDate"></div>
+                </div>
+                <div class="day-events-list" id="dayEventsList"></div>
+            </div>
+        </div>
+
+        <div id="aboutPage" class="page">
+            <div class="page-header">
+                <h1>About</h1>
+            </div>
+            <div class="about-content">
+                <div class="about-card">
+                    <h2>Security Lab</h2>
+                    <p>개인 학습 및 실습을 위한 취약점 연구 환경입니다.</p>
+                    <p>이 사이트는 교육 목적으로만 사용되며, 실제 서비스에 적용되어서는 안 됩니다.</p>
+                </div>
+                <div class="about-card">
+                    <h3>⚠️ 주의사항</h3>
+                    <ul>
+                        <li>모든 취약점은 의도적으로 구현된 것입니다</li>
+                        <li>실제 환경에서는 절대 사용하지 마세요</li>
+                        <li>학습 목적으로만 활용하세요</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div id="newsPage" class="page">
+            <div class="page-header">
+                <h1>Security News</h1>
+                <div class="news-header-actions">
+                    <button class="refresh-btn" onclick="crawlBoannews()">🔄 최신 뉴스 가져오기</button>
+                </div>
+            </div>
+            <div class="crawl-status" id="crawlStatus"></div>
+            <div class="news-filter">
+                <button class="filter-btn active" onclick="filterNews('all')">전체</button>
+                <button class="filter-btn" onclick="filterNews('vulnerability')">취약점</button>
+                <button class="filter-btn" onclick="filterNews('incident')">보안사고</button>
+                <button class="filter-btn" onclick="filterNews('tech')">기술</button>
+                <button class="filter-btn" onclick="filterNews('policy')">정책/규제</button>
+            </div>
+            <div id="newsList" class="news-list"></div>
+
+            <!-- View News Modal -->
+            <div id="viewNewsModal" class="vuln-modal">
+                <div class="vuln-modal-content">
+                    <button class="close-btn" onclick="closeViewNewsModal()">×</button>
+                    <div id="newsDetailContent"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="logbookPage" class="page">
+            <div class="page-header">
+                <h1>LogBook</h1>
+                <button class="add-btn" onclick="showAddLogModal()">+ 로그 추가</button>
+            </div>
+            <div id="logbookList" class="logbook-list"></div>
+
+            <!-- Add/Edit Log Modal -->
+            <div id="addLogModal" class="event-modal">
+                <div class="event-modal-content">
+                    <button class="close-btn" onclick="closeAddLogModal()">×</button>
+                    <h2 id="logFormTitle">로그 추가</h2>
+                    
+                    <div class="input-group">
+                        <label>날짜</label>
+                        <input type="date" id="logDate">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>제목</label>
+                        <input type="text" id="logTitle" placeholder="오늘의 학습 제목">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>내용</label>
+                        <textarea id="logContent" placeholder="오늘 무엇을 배웠고, 어떤 CTF를 풀었고, 무엇이 어려웠는지 등을 기록하세요..." style="min-height: 200px;"></textarea>
+                    </div>
+                    
+                    <button class="submit-btn" onclick="saveLog()">저장</button>
+                </div>
+            </div>
+
+            <!-- View Log Modal -->
+            <div id="viewLogModal" class="vuln-modal">
+                <div class="vuln-modal-content">
+                    <button class="close-btn" onclick="closeViewLogModal()">×</button>
+                    <button class="edit-vuln-btn" onclick="editCurrentLog()">✏️ 수정</button>
+                    <button class="delete-vuln-btn" onclick="deleteCurrentLog()">🗑️ 삭제</button>
+                    <div id="logDetailContent"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="archivesPage" class="page">
+            <div class="page-header">
+                <h1>Archives</h1>
+                <button class="add-btn" onclick="showAddArchiveModal()">+ 아카이브 추가</button>
+            </div>
+            <div id="archivesList" class="archives-list"></div>
+
+            <!-- Add/Edit Archive Modal -->
+            <div id="addArchiveModal" class="event-modal">
+                <div class="event-modal-content">
+                    <button class="close-btn" onclick="closeAddArchiveModal()">×</button>
+                    <h2 id="archiveFormTitle">아카이브 추가</h2>
+                    
+                    <div class="input-group">
+                        <label>제목</label>
+                        <input type="text" id="archiveTitle" placeholder="대회/콘퍼런스 이름">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>날짜</label>
+                        <input type="date" id="archiveDate">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>유형</label>
+                        <select id="archiveType" onchange="toggleArchiveCustomType()">
+                            <option value="ctf">CTF</option>
+                            <option value="conference">콘퍼런스</option>
+                            <option value="custom">기타</option>
+                        </select>
+                    </div>
+                    
+                    <div class="input-group" id="customTypeGroup" style="display: none;">
+                        <label>유형 직접 입력</label>
+                        <input type="text" id="archiveCustomType" placeholder="유형을 입력하세요">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>설명 (선택사항)</label>
+                        <textarea id="archiveDescription" placeholder="간단한 설명이나 결과"></textarea>
+                    </div>
+                    
+                    <button class="submit-btn" onclick="saveArchive()">저장</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
