@@ -1,6 +1,6 @@
 // Authentication
-const VALID_USERNAME = 'fl02ky';
-const VALID_PASSWORD = 'vmffhwmzl404';
+const VALID_USERNAME = 'rokta';
+const VALID_PASSWORD = 'rokta';
 
 // State Management
 let vulnerabilities = {};
